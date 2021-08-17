@@ -1,0 +1,13 @@
+ujson
+djangorestframework~=3.12.4
+markdown
+django-filter
+djangorestframework-recursive~=0.1.2
+django-cors-headers
+django-debug-toolbar~=3.2.1
+djangochannelsrestframework~=0.3.0
+django-redis
+channels~=3.0.4
+django
+Pillow
+Faker
