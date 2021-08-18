@@ -102,10 +102,10 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bongo_django_ecommerce',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '',
+        'NAME': 'saifshahriar$django_ecommerce',
+        'USER': 'saifshahriar',
+        'PASSWORD': 's+k258ks',
+        'HOST': 'saifshahriar.mysql.pythonanywhere-services.com',
         'PORT': '',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
