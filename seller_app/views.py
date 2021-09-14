@@ -3,7 +3,7 @@ import json
 from decimal import Decimal
 
 import ujson
-from django.db.models import Prefetch, QuerySet, Q, Count
+from django.db.models import F, Count, Sum
 from django.db.models.functions import TruncDay
 from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponse
@@ -14,6 +14,7 @@ from rest_framework.response import Response
 
 from admin_app.models import ProductVariationAdmin, Brand
 from admin_app.serializers import CategorySerializer, ProductVariationAdminSerializer, BrandSerializer
+from auth_app.models import Users
 from backend.mixins import PageNumberPaginationWithCount
 from seller_app.models import Shop, Product, ProductImage
 from seller_app.serializers import PostSellerShopSerializer, ShopSerializer, ProductSerializer, ProductImageSerializer, \
@@ -207,11 +208,22 @@ def inactivate_product(request):
 
 @api_view(['GET'])
 def dash_basic_info(request):
-    products = Product.objects.filter(seller=request.user, trash=False, active=True).count()
+    # products = Product.objects.filter(seller=request.user, trash=False, active=True).count()
     shops = Shop.objects.filter(seller=request.user, trash=False, active=True).count()
+    seller_products = Product.objects.filter(seller=request.user, trash=False, active=True)
+    checkout_seller_products = CheckoutProduct.objects.filter(product__in=seller_products)
+    today_earning = Decimal(0)
+    total_price = Decimal(0)
+    for i in checkout_seller_products:
+        total_price += (i.selling_price - (i.selling_price * (i.offer_price / Decimal(100)))) * i.quantity
+
+        if i.created.date() == datetime.datetime.today().date():
+            today_earning += (i.selling_price - (i.selling_price * (i.offer_price / Decimal(100)))) * i.quantity
     return Response(data={
-        'products': products,
-        'shops': shops
+        'products': seller_products.count(),
+        'shops': shops,
+        'total_selling_price': total_price,
+        'today_selling_price': today_earning
     }, status=status.HTTP_200_OK)
 
 
@@ -401,7 +413,9 @@ def chart_sell_vs_date(request):
         # data.append({str(d.date()): 0})
         avail = [i for i in checkout_product if i['date'].date() == d.date()]
         if len(avail) > 0:
-            data.append([d.date(), avail[0]['total']])
+            data.append([d.date().strftime('%d.%m.%Y'), avail[0]['total']])
         else:
-            data.append([d.date(), 0])
+            data.append([d.date().strftime('%d.%m.%Y'), 0])
     return Response(data=data, status=status.HTTP_200_OK)
+
+

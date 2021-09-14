@@ -9,5 +9,9 @@ class IsSeller(MiddlewareMixin):
         url = request.path
         # request.user.is_authenticated and request.user.is_seller
         if "/api/seller/" in url:
-            if not request.user.is_authenticated or not request.user.is_seller:
+            if not request.user.is_authenticated:
+                if not request.user.is_seller:
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
+            else:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
+
